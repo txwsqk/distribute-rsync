@@ -6,6 +6,14 @@
 
 C/S 结构
 
+# 说明
+
+> task = 'task'  要同步文件的绝对路径
+> lookup = 'lookup' 发现任务 lookup +1
+> synchronize_queue = 'synchronize_queue'  set类型,同步完成的机器会把ip存入供其他rsync使用
+> finished_queue = 'finished_queue'        同上,记录完成任务的机器ip
+> running_queue = 'running_queue'          set类型,正在执行任务的机器ip
+
 # 使用
 
 1. pip install redis
