@@ -50,9 +50,16 @@ def start_rsync(minion):
     p = subprocess.Popen(
         'export RSYNC_PASSWORD="%s";rsync -av %s %s' % (rsync_passwd, source, destination),
         shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    logging.info('rsync complete: \n%s\n%s', p.stdout.read(), p.stderr.read())
-    redis_conn.sadd(synchronize_queue, minion, local_ip)
-    redis_conn.sadd(finished_queue, minion, local_ip)
+    output = p.stdout.read()
+    err = p.stderr.read()
+
+    if not err:
+        redis_conn.sadd(synchronize_queue, minion, local_ip)
+        redis_conn.sadd(finished_queue, minion, local_ip)
+        logging.info('rsync complete: \noutput:%s\nerror:%s', output, err)
+    else:
+        logging.info('rsync error: \noutput:%s\nerror:%s', output, err)
+
     redis_conn.srem(running_queue, local_ip)
 
     logging.info('END rsync:\n  syn_queue:%d\n  fin_queue:%d\n', redis_conn.scard(synchronize_queue),
@@ -97,5 +104,4 @@ if __name__ == '__main__':
                 rsync_file()
             else:
                 logging.info('task is already running, exit')
-
 
